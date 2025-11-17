@@ -16,8 +16,8 @@ class QuizApp extends StatelessWidget {
 
       initialRoute: '/',
       routes: {
-        '/': (context) => StartScreen(),
-        '/q1': (context) => Questionspage(),
+        '/': (context) => const StartScreen(),
+        '/q1': (context) => const QuestionsPage(),
       },
     );
   }

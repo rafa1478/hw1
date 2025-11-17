@@ -5,7 +5,7 @@ class TextStyles {
     return const TextStyle(
       fontSize: 24,
       fontFamily: 'Gilory',
-      //fontWeight: FontWeight.bold,
+
       color: Colors.white,
     );
   }

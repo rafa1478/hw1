@@ -1,46 +1,75 @@
 import 'package:flutter/material.dart';
-import '../styles/text_styles.dart';
+import 'package:collection/collection.dart';
 import '../widgets/answerso_ptions.dart';
 import '../models/questions.dart';
+import 'resultpage.dart';
 
-class Questionspage extends StatefulWidget {
-  Questionspage({super.key});
+class QuestionsPage extends StatefulWidget {
+  const QuestionsPage({super.key});
 
   @override
-  State<Questionspage> createState() => _QuestionspageState();
+  State<QuestionsPage> createState() => _QuestionsPageState();
 }
 
-class _QuestionspageState extends State<Questionspage> {
-  int? _selectedIndex;
+class _QuestionsPageState extends State<QuestionsPage> {
+  List<int> _selectedIndexes = [];
   int _questionIndex = 0;
+  int score = 0;
 
-  void _answerSelected(int answerIndex, String answerText) {
+  void _answerSelected(int index) {
     setState(() {
-      _selectedIndex = answerIndex;
+      final currentQuestion = quizData[_questionIndex];
+      if (currentQuestion.multichooses) {
+        if (_selectedIndexes.contains(index)) {
+          _selectedIndexes.remove(index);
+        } else {
+          _selectedIndexes.add(index);
+        }
+      } else {
+        _selectedIndexes = [index];
+      }
     });
   }
 
   void _nextQuestion() {
-    if (_questionIndex >= quizData.length - 1) {
-      print('The quiz is done ');
+    final currentQuestion = quizData[_questionIndex];
+    if (_selectedIndexes.isEmpty) return;
 
+    if (currentQuestion.multichooses) {
+      _selectedIndexes.sort();
+      List<int> correct = List.from(currentQuestion.correctAnswers)..sort();
+      if (_selectedIndexes.length == correct.length &&
+          ListEquality().equals(_selectedIndexes, correct)) {
+        score++;
+      }
+    } else {
+      if (_selectedIndexes.first == currentQuestion.correctAnswers.first) {
+        score++;
+      }
+    }
+
+    if (_questionIndex >= quizData.length - 1) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) =>
+              ResultPage(score: score, totalQuestions: quizData.length),
+        ),
+      );
       return;
     }
-    if (_selectedIndex != null) {
-      setState(() {
-        _questionIndex++;
-        _selectedIndex = null;
-      });
-    } else {
-      print("You must choose answer");
-    }
+
+    setState(() {
+      _questionIndex++;
+      _selectedIndexes.clear();
+    });
   }
 
   void _previousQuestion() {
     if (_questionIndex > 0) {
       setState(() {
         _questionIndex--;
-        _selectedIndex = null;
+        _selectedIndexes.clear();
       });
     } else {
       Navigator.pop(context);
@@ -50,52 +79,65 @@ class _QuestionspageState extends State<Questionspage> {
   @override
   Widget build(BuildContext context) {
     final currentQuestion = quizData[_questionIndex];
-    final List<dynamic> currentOptions = currentQuestion.chooses;
+
     return Scaffold(
       backgroundColor: const Color(0xFF231F3E),
       body: SafeArea(
         child: Padding(
-          padding: EdgeInsets.all(20),
+          padding: const EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
-                  color: Color(0xFF8E84FF),
+                  color: const Color(0xFF8E84FF),
                   borderRadius: BorderRadius.circular(29),
-                  border: Border.all(color: Color(0xFFC4BFF9), width: 1.3),
+                  border: Border.all(
+                    color: const Color(0xFFC4BFF9),
+                    width: 1.3,
+                  ),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.loop, color: Colors.white, size: 18),
-                    SizedBox(width: 6),
+                    Image.asset("images/question.png", height: 24),
+                    const SizedBox(width: 6),
                     Text(
                       "Question ${_questionIndex + 1}",
-                      style: TextStyle(color: Colors.white),
+                      style: const TextStyle(color: Colors.white),
                     ),
                   ],
                 ),
               ),
-              SizedBox(height: 30),
-              Text(currentQuestion.questionText, style: TextStyles.h1()),
-              SizedBox(height: 30),
-              ...List.generate(currentOptions.length, (index) {
-                final answerText = currentOptions[index];
+
+              const SizedBox(height: 30),
+
+              Text(
+                currentQuestion.questionText,
+                style: const TextStyle(color: Colors.white, fontSize: 24),
+              ),
+
+              const SizedBox(height: 30),
+
+              ...List.generate(currentQuestion.chooses.length, (index) {
                 return OptionButton(
-                  answerText: answerText,
-                  selected: _selectedIndex == index,
-                  onTap: () => _answerSelected(index, answerText),
+                  answerText: currentQuestion.chooses[index],
+                  selected: _selectedIndexes.contains(index),
+                  onTap: () => _answerSelected(index),
                 );
               }),
+
               const Spacer(),
+
               Row(
                 children: [
                   Expanded(
                     child: OutlinedButton(
                       onPressed: _previousQuestion,
-
                       style: OutlinedButton.styleFrom(
                         foregroundColor: Colors.white,
                         side: const BorderSide(color: Color(0xFFC4BFF9)),
@@ -105,20 +147,20 @@ class _QuestionspageState extends State<Questionspage> {
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
-                        children: [
+                        children: const [
                           Icon(Icons.arrow_back),
                           SizedBox(width: 12),
-                          const Text("Back"),
+                          Text("Back"),
                         ],
                       ),
                     ),
                   ),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: 20),
                   Expanded(
                     child: ElevatedButton(
                       onPressed: _nextQuestion,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFF8E84FF),
+                        backgroundColor: const Color(0xFF8E84FF),
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -132,7 +174,7 @@ class _QuestionspageState extends State<Questionspage> {
                                 ? "Finish"
                                 : "Next",
                           ),
-                          SizedBox(width: 12),
+                          const SizedBox(width: 12),
                           Icon(
                             _questionIndex >= quizData.length - 1
                                 ? Icons.done_all
@@ -144,17 +186,17 @@ class _QuestionspageState extends State<Questionspage> {
                   ),
                 ],
               ),
-              SizedBox(height: 7),
-              Center(
+
+              const SizedBox(height: 7),
+              const Center(
                 child: Divider(
                   thickness: 3,
                   color: Colors.white,
                   indent: 130,
                   endIndent: 130,
-                  radius: BorderRadius.circular(50),
                 ),
               ),
-              SizedBox(height: 7),
+              const SizedBox(height: 3),
             ],
           ),
         ),

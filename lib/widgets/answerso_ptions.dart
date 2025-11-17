@@ -14,39 +14,41 @@ class OptionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: selected ? Color(0xFFC4BFF9) : Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.white),
-          ),
-          child: Row(
-            children: [
-              selected
-                  ? Container(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: const Color(0xFF231F3E),
-                      ),
-                      child: Icon(Icons.check, color: Colors.white),
-                    )
-                  : Icon(Icons.radio_button_off),
-
-              const SizedBox(width: 12),
-              Text(
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: selected ? const Color(0xFFC4BFF9) : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.white),
+        ),
+        child: Row(
+          children: [
+            selected
+                ? Container(
+                    width: 20,
+                    height: 20,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Color(0xFF231F3E),
+                    ),
+                    child: const Icon(
+                      Icons.check,
+                      color: Colors.white,
+                      size: 16,
+                    ),
+                  )
+                : const Icon(Icons.radio_button_off, size: 20),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
                 answerText,
-                style: const TextStyle(
-                  color: const Color(0xFF231F3E),
-                  fontSize: 16,
-                ),
+                style: const TextStyle(color: Color(0xFF231F3E), fontSize: 16),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
